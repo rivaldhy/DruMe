@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Pro Drum v15 - Pitch Tuning & Audio Persistent</title>
+    <title>Pro Drum v15 - Cloud Sync</title>
     <style>
         body { margin: 0; background: #050505; overflow: hidden; font-family: -apple-system, sans-serif; -webkit-user-select: none; color: white; }
         canvas { display: block; touch-action: none; }
@@ -13,7 +13,7 @@
         button { 
             padding: 14px 20px; border-radius: 12px; border: 1px solid #333; 
             background: rgba(26, 26, 26, 0.8); color: white; font-weight: bold; 
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px); cursor: pointer;
         }
         button.active { background: #007AFF; border-color: #5AC8FA; }
         #editModal {
@@ -31,6 +31,7 @@
         .switch-row { display: flex; justify-content: space-between; align-items: center; background: #000; padding: 10px; border-radius: 10px; border: 1px solid #333; }
         .m-btns { display: flex; flex-direction: column; gap: 8px; margin-top: 15px; }
         .btn-save { background: #007AFF; border: none; padding: 12px; font-weight: bold; color: white; border-radius: 10px; }
+        #status { position: fixed; bottom: 10px; right: 10px; font-size: 10px; color: #555; }
     </style>
 </head>
 <body>
@@ -39,6 +40,8 @@
         <button id="editBtn">MODE: PLAY</button>
         <button id="addBtn" style="display:none;">+ TAMBAH PAD</button>
     </div>
+
+    <div id="status">Cloud Sync: Active</div>
 
     <div id="editModal">
         <h3 style="margin:0 0 15px 0">Edit Pad</h3>
@@ -50,30 +53,64 @@
         <div class="field">
             <div class="switch-row">
                 <label style="margin:0">Velocity (On/Off)</label>
-                <input type="checkbox" id="pSens" style="width:20px; height:20px;">
+                <input type="checkbox" id="pSens">
             </div>
         </div>
         <div class="field"><label>Warna</label><input type="color" id="pColor" style="width:100%; height:40px; background:none; border:none;"></div>
         <div class="field"><label>Audio</label><input type="file" id="pAudio" accept=".wav, .mp3"></div>
         <div class="m-btns">
-            <button class="btn-save" onclick="savePad()">Simpan</button>
-            <button onclick="deletePad()" style="background:#FF3B30; border:none; padding:10px; color:white; border-radius:10px;">Hapus</button>
-            <button onclick="closeModal()" style="background:none; border:none; color:#555">Batal</button>
+            <button class="btn-save" id="btnSaveAction">Simpan</button>
+            <button id="btnDeleteAction" style="background:#FF3B30; border:none; padding:10px; color:white; border-radius:10px;">Hapus</button>
+            <button id="btnCloseAction" style="background:none; border:none; color:#555">Batal</button>
         </div>
     </div>
 
     <canvas id="canvas"></canvas>
 
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyDd1_GfXEAubvEym0mYkXiz8SUZ35FtodY",
+        authDomain: "databersama.firebaseapp.com",
+        databaseURL: "https://databersama-default-rtdb.firebaseio.com",
+        projectId: "databersama",
+        storageBucket: "databersama.firebasestorage.app",
+        messagingSenderId: "699549114383",
+        appId: "1:699549114383:web:1719fedbdde88a2ddb437a"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const drumRef = ref(db, 'drumLayout/global');
+
+    // Bridge ke global scope agar bisa dipanggil script non-module
+    window.saveToCloud = (data) => {
+        set(drumRef, data);
+    };
+
+    // Listen data dari cloud
+    onValue(drumRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+            window.pads = data;
+            if (window.loadAudioFiles) window.loadAudioFiles();
+        }
+    });
+</script>
+
 <script>
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
-    let audioCtx, isEditMode = false, pads = [], audioBuffers = {}, activeSources = {}, activeHits = {};
-    let activeTouches = {}; 
+    let audioCtx, isEditMode = false, selectedPadIndex = null;
+    window.pads = []; 
+    let audioBuffers = {}, activeSources = {}, activeHits = {}, activeTouches = {}; 
     const GRID = 20;
-
     const dbName = "DrumAudioDB";
     const storeName = "samples";
 
+    // --- Database & Storage Logic ---
     function openDB() {
         return new Promise((resolve, reject) => {
             const request = indexedDB.open(dbName, 1);
@@ -89,12 +126,12 @@
         tx.objectStore(storeName).put(arrayBuffer, id);
     }
 
-    async function loadAudioFiles() {
+    window.loadAudioFiles = async function() {
         const db = await openDB();
         const tx = db.transaction(storeName, "readonly");
         const store = tx.objectStore(storeName);
         
-        for (let p of pads) {
+        for (let p of window.pads) {
             const request = store.get(p.id);
             request.onsuccess = async () => {
                 if (request.result) {
@@ -108,10 +145,10 @@
     function init() {
         canvas.width = window.innerWidth; canvas.height = window.innerHeight;
         const saved = localStorage.getItem('drumSetupV15');
-        pads = saved ? JSON.parse(saved) : [
+        window.pads = saved ? JSON.parse(saved) : [
             { id: Date.now(), name: 'KICK', x: 100, y: 100, w: 200, h: 200, color: '#ffb3ba', volume: 1.0, muteGroup: 0, useVelocity: true, pitch: 1.0 }
         ];
-        loadAudioFiles();
+        window.loadAudioFiles();
         render();
     }
 
@@ -137,24 +174,19 @@
         if (audioBuffers[pad.id]) {
             const s = audioCtx.createBufferSource();
             s.buffer = audioBuffers[pad.id];
-            // TERAPKAN PITCH TUNING DISINI
             s.playbackRate.value = pad.pitch || 1.0; 
             s.connect(g); s.start();
             if (pad.muteGroup > 0) {
                 if (!activeSources[pad.muteGroup]) activeSources[pad.muteGroup] = [];
                 activeSources[pad.muteGroup].push({ s, g });
             }
-        } else {
-            const o = audioCtx.createOscillator();
-            o.frequency.setValueAtTime(60 * (pad.pitch || 1.0), audioCtx.currentTime);
-            o.connect(g); o.start(); o.stop(audioCtx.currentTime + 0.1);
         }
     }
 
     function render() {
         ctx.fillStyle = '#050505';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        pads.forEach(p => {
+        window.pads.forEach(p => {
             const hit = activeHits[p.id];
             if (hit && !isEditMode) { ctx.shadowBlur = 40; ctx.shadowColor = p.color; }
             ctx.fillStyle = hit && !isEditMode ? p.color : (isEditMode ? '#1a1a1c' : '#111');
@@ -166,21 +198,20 @@
             if (isEditMode) {
                 ctx.fillStyle = p.color; ctx.beginPath();
                 ctx.arc(p.x + p.w, p.y + p.h, 12, 0, Math.PI*2); ctx.fill();
-                ctx.font = '9px monospace';
-                ctx.fillText(`PITCH: ${p.pitch || 1.0}`, p.x + p.w/2, p.y + p.h - 10);
             }
         });
         requestAnimationFrame(render);
     }
 
+    // --- Interaction Logic ---
     canvas.addEventListener('touchstart', (e) => {
         e.preventDefault();
         for (let i = 0; i < e.changedTouches.length; i++) {
             const t = e.changedTouches[i];
             const mx = t.clientX, my = t.clientY;
 
-            for (let j = pads.length - 1; j >= 0; j--) {
-                const p = pads[j];
+            for (let j = window.pads.length - 1; j >= 0; j--) {
+                const p = window.pads[j];
                 if (isEditMode) {
                     if (Math.hypot(mx - (p.x + p.w), my - (p.y + p.h)) < 40) {
                         activeTouches[t.identifier] = { type: 'resize', index: j, sw: p.w, sh: p.h, sx: mx, sy: my };
@@ -189,9 +220,7 @@
                     if (mx > p.x && mx < p.x + p.w && my > p.y && my < p.y + p.h) {
                         activeTouches[t.identifier] = { type: 'drag', index: j, ox: mx - p.x, oy: my - p.y, moved: false };
                         const tid = t.identifier;
-                        setTimeout(() => { 
-                            if(activeTouches[tid] && !activeTouches[tid].moved) openModal(j); 
-                        }, 250);
+                        setTimeout(() => { if(activeTouches[tid] && !activeTouches[tid].moved) openModal(j); }, 250);
                         break;
                     }
                 } else {
@@ -207,7 +236,7 @@
                 }
             }
         }
-    }, {passive: false});
+    });
 
     canvas.addEventListener('touchmove', (e) => {
         e.preventDefault();
@@ -215,7 +244,7 @@
             const t = e.changedTouches[i];
             const data = activeTouches[t.identifier];
             if (!data) continue;
-            const p = pads[data.index];
+            const p = window.pads[data.index];
             if (data.type === 'resize') {
                 p.w = snap(Math.max(80, data.sw + (t.clientX - data.sx)));
                 p.h = snap(Math.max(80, data.sh + (t.clientY - data.sy)));
@@ -225,34 +254,32 @@
                 p.y = snap(t.clientY - data.oy);
             }
         }
-    }, {passive: false});
-
-    canvas.addEventListener('touchend', (e) => {
-        for (let i = 0; i < e.changedTouches.length; i++) {
-            delete activeTouches[e.changedTouches[i].identifier];
-        }
-        if(isEditMode) saveData();
     });
 
+    canvas.addEventListener('touchend', () => { 
+        activeTouches = {}; 
+        if(isEditMode) syncData(); 
+    });
+
+    // --- UI Controls ---
     function openModal(idx) {
-        let p = pads[idx]; selectedPadIndex = idx;
+        selectedPadIndex = idx;
+        const p = window.pads[idx];
         document.getElementById('pName').value = p.name;
         document.getElementById('pGroup').value = p.muteGroup;
         document.getElementById('pVol').value = p.volume;
         document.getElementById('pPitch').value = p.pitch || 1.0;
-        document.getElementById('pitchLabel').innerText = `Pitch Tuning (${p.pitch || 1.0})`;
         document.getElementById('pColor').value = p.color;
         document.getElementById('pSens').checked = p.useVelocity !== false;
         document.getElementById('editModal').style.display = 'block';
     }
 
-    // Update label pitch saat slider digeser
     document.getElementById('pPitch').oninput = function() {
         document.getElementById('pitchLabel').innerText = `Pitch Tuning (${this.value})`;
     };
 
-    async function savePad() {
-        let p = pads[selectedPadIndex];
+    document.getElementById('btnSaveAction').onclick = async () => {
+        let p = window.pads[selectedPadIndex];
         p.name = document.getElementById('pName').value;
         p.muteGroup = parseInt(document.getElementById('pGroup').value) || 0;
         p.volume = parseFloat(document.getElementById('pVol').value);
@@ -264,15 +291,24 @@
         if (file) {
             const b = await file.arrayBuffer();
             await saveAudioFile(p.id, b);
-            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (!audioCtx) audioCtx = new AudioContext();
             audioBuffers[p.id] = await audioCtx.decodeAudioData(b.slice(0));
         }
-        saveData(); closeModal();
-    }
+        syncData(); closeModal();
+    };
 
     function closeModal() { document.getElementById('editModal').style.display = 'none'; }
-    function deletePad() { pads.splice(selectedPadIndex, 1); saveData(); closeModal(); }
-    function saveData() { localStorage.setItem('drumSetupV15', JSON.stringify(pads)); }
+    document.getElementById('btnCloseAction').onclick = closeModal;
+    
+    document.getElementById('btnDeleteAction').onclick = () => {
+        window.pads.splice(selectedPadIndex, 1);
+        syncData(); closeModal();
+    };
+
+    function syncData() {
+        localStorage.setItem('drumSetupV15', JSON.stringify(window.pads));
+        if (window.saveToCloud) window.saveToCloud(window.pads);
+    }
     
     document.getElementById('editBtn').onclick = (e) => {
         isEditMode = !isEditMode;
@@ -282,7 +318,8 @@
     };
 
     document.getElementById('addBtn').onclick = () => {
-        pads.push({ id: Date.now(), name: 'NEW', x: 50, y: 50, w: 150, h: 150, color: '#bae1ff', volume: 1.0, muteGroup: 0, useVelocity: true, pitch: 1.0 });
+        window.pads.push({ id: Date.now(), name: 'NEW', x: 50, y: 50, w: 150, h: 150, color: '#bae1ff', volume: 1.0, muteGroup: 0, useVelocity: true, pitch: 1.0 });
+        syncData();
     };
 
     init();
