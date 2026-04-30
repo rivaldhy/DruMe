@@ -5,74 +5,66 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Pro Drum v15 - Cloud Sync Responsive</title>
+    <title>Pro Drum v15 - Full Features</title>
     <style>
         :root { --safe-top: env(safe-area-inset-top); --safe-bottom: env(safe-area-inset-bottom); }
-        body { margin: 0; background: #050505; overflow: hidden; font-family: -apple-system, sans-serif; -webkit-user-select: none; color: white; height: 100vh; width: 100vw; }
-        canvas { display: block; touch-action: none; width: 100%; height: 100%; }
+        body { margin: 0; background: #000; overflow: hidden; font-family: sans-serif; -webkit-user-select: none; touch-action: none; }
+        canvas { display: block; width: 100vw; height: 100vh; }
         
         #ui { 
-            position: absolute; 
-            top: calc(10px + var(--safe-top)); 
-            left: 20px; 
-            display: flex; 
-            gap: 10px; 
-            z-index: 100; 
+            position: absolute; top: calc(10px + var(--safe-top)); left: 15px; 
+            display: flex; gap: 8px; z-index: 100; 
         }
         
         button { 
-            padding: 12px 18px; border-radius: 12px; border: 1px solid #333; 
-            background: rgba(26, 26, 26, 0.8); color: white; font-weight: bold; 
-            backdrop-filter: blur(10px); cursor: pointer; font-size: 13px;
+            padding: 10px 16px; border-radius: 10px; border: 1px solid #444; 
+            background: rgba(30, 30, 30, 0.9); color: white; font-weight: bold; 
+            backdrop-filter: blur(5px); font-size: 12px;
         }
-        button.active { background: #007AFF; border-color: #5AC8FA; }
+        button.active { background: #007AFF; border-color: #FFF; }
         
         #editModal {
             display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: #1c1c1e; padding: 20px; border-radius: 24px; border: 1px solid #444;
-            z-index: 200; width: 85%; max-width: 320px; box-shadow: 0 0 100px rgba(0,0,0,1);
-            max-height: 85vh; overflow-y: auto;
+            background: #1c1c1e; padding: 20px; border-radius: 20px; border: 1px solid #444;
+            z-index: 200; width: 80%; max-width: 300px; max-height: 85vh; overflow-y: auto; color: white;
         }
         .field { margin-bottom: 12px; }
-        label { display: block; font-size: 10px; color: #888; margin-bottom: 4px; text-transform: uppercase; }
-        input[type="text"], input[type="range"], input[type="number"] { 
+        label { display: block; font-size: 10px; color: #aaa; margin-bottom: 4px; text-transform: uppercase; }
+        input[type="text"], input[type="number"], input[type="range"] { 
             width: 100%; box-sizing: border-box; background: #000; border: 1px solid #333; 
-            color: white; padding: 10px; border-radius: 10px; font-size: 16px; /* Mencegah auto-zoom di iOS */
+            color: white; padding: 10px; border-radius: 8px; font-size: 16px;
         }
-        .switch-row { display: flex; justify-content: space-between; align-items: center; background: #000; padding: 10px; border-radius: 10px; border: 1px solid #333; }
+        .switch-row { display: flex; justify-content: space-between; align-items: center; background: #000; padding: 10px; border-radius: 8px; border: 1px solid #333; }
         .m-btns { display: flex; flex-direction: column; gap: 8px; margin-top: 15px; }
-        .btn-save { background: #007AFF; border: none; padding: 14px; font-weight: bold; color: white; border-radius: 10px; }
-        #status { position: fixed; bottom: calc(5px + var(--safe-bottom)); right: 10px; font-size: 9px; color: #444; }
+        .btn-save { background: #007AFF; border: none; padding: 12px; color: white; border-radius: 8px; font-weight: bold; }
     </style>
 </head>
 <body>
 
     <div id="ui">
-        <button id="editBtn">MODE: PLAY</button>
+        <button id="editBtn">PLAY MODE</button>
         <button id="addBtn" style="display:none;">+ PAD</button>
     </div>
 
-    <div id="status">Cloud Sync: Active</div>
-
     <div id="editModal">
-        <h3 style="margin:0 0 15px 0; font-size: 18px;">Edit Pad</h3>
+        <h3 style="margin-top:0">Setelan Pad</h3>
         <div class="field"><label>Nama Pad</label><input type="text" id="pName"></div>
-        <div class="field"><label>Mute Group</label><input type="number" id="pGroup" min="0"></div>
-        <div class="field"><label>Volume</label><input type="range" id="pVol" min="0" max="1" step="0.01"></div>
-        <div class="field"><label id="pitchLabel">Pitch Tuning (1.0)</label><input type="range" id="pPitch" min="0.5" max="2.0" step="0.01"></div>
-        
+        <div class="field"><label>Mute Group (0 = Off)</label><input type="number" id="pGroup" min="0"></div>
+        <div class="field"><label>Volume</label><input type="range" id="pVol" min="0" max="1" step="0.1"></div>
+        <div class="field"><label>Pitch</label><input type="range" id="pPitch" min="0.5" max="2.0" step="0.1"></div>
         <div class="field">
             <div class="switch-row">
-                <label style="margin:0">Velocity (On/Off)</label>
+                <label style="margin:0">Velocity Sens</label>
                 <input type="checkbox" id="pSens">
             </div>
         </div>
-        <div class="field"><label>Warna</label><input type="color" id="pColor" style="width:100%; height:40px; background:none; border:none;"></div>
-        <div class="field"><label>Audio</label><input type="file" id="pAudio" accept=".wav, .mp3"></div>
+        <div class="field"><label>Warna</label><input type="color" id="pColor" style="width:100%; height:35px; border:none; background:none;"></div>
+        <div class="field"><label>GANTI AUDIO (.wav, .mp3)</label><input type="file" id="pAudio" accept=".wav, .mp3"></div>
+        
         <div class="m-btns">
-            <button class="btn-save" id="btnSaveAction">Simpan</button>
-            <button id="btnDeleteAction" style="background:#FF3B30; border:none; padding:10px; color:white; border-radius:10px;">Hapus</button>
-            <button id="btnCloseAction" style="background:none; border:none; color:#555; padding: 8px;">Batal</button>
+            <button class="btn-save" id="btnSaveAction">SIMPAN</button>
+            <button id="btnDeleteAction" style="background:#FF3B30; border:none; padding:10px; color:white; border-radius:8px;">HAPUS</button>
+            <button id="btnCloseAction" style="background:none; border:none; color:#777;">BATAL</button>
         </div>
     </div>
 
@@ -96,9 +88,7 @@
     const db = getDatabase(app);
     const drumRef = ref(db, 'drumLayout/global');
 
-    window.saveToCloud = (data) => {
-        set(drumRef, data);
-    };
+    window.saveToCloud = (data) => set(drumRef, data);
 
     onValue(drumRef, (snapshot) => {
         const data = snapshot.val();
@@ -114,225 +104,157 @@
     const ctx = canvas.getContext('2d');
     let audioCtx, isEditMode = false, selectedPadIndex = null;
     window.pads = []; 
-    let audioBuffers = {}, activeSources = {}, activeHits = {}, activeTouches = {}; 
-    const GRID = 10;
-    const dbName = "DrumAudioDB";
-    const storeName = "samples";
+    let audioBuffers = {}, activeSources = {}, activeHits = {}, activeTouches = {};
 
-    function openDB() {
-        return new Promise((resolve, reject) => {
-            const request = indexedDB.open(dbName, 1);
-            request.onupgradeneeded = () => request.result.createObjectStore(storeName);
-            request.onsuccess = () => resolve(request.result);
-            request.onerror = () => reject(request.error);
-        });
+    function getScreenPos(p) {
+        return {
+            x: p.rx * canvas.width, y: p.ry * canvas.height,
+            w: p.rw * canvas.width, h: p.rh * canvas.height
+        };
     }
-
-    async function saveAudioFile(id, arrayBuffer) {
-        const db = await openDB();
-        const tx = db.transaction(storeName, "readwrite");
-        tx.objectStore(storeName).put(arrayBuffer, id);
-    }
-
-    window.loadAudioFiles = async function() {
-        const db = await openDB();
-        const tx = db.transaction(storeName, "readonly");
-        const store = tx.objectStore(storeName);
-        for (let p of window.pads) {
-            const request = store.get(p.id);
-            request.onsuccess = async () => {
-                if (request.result) {
-                    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                    audioBuffers[p.id] = await audioCtx.decodeAudioData(request.result.slice(0));
-                }
-            };
-        }
-    }
-
-    // --- RESPONSIVE LOGIC ---
-    let lastW = window.innerWidth;
-    let lastH = window.innerHeight;
 
     function resize() {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
-        
-        // Sesuaikan posisi pad saat layar berputar/berubah ukuran
-        const ratioX = canvas.width / lastW;
-        const ratioY = canvas.height / lastH;
-        
-        window.pads.forEach(p => {
-            p.x *= ratioX;
-            p.y *= ratioY;
-            // Opsional: p.w *= ratioX; (Jika ingin ukuran pad ikut mengecil)
-        });
-        
-        lastW = canvas.width;
-        lastH = canvas.height;
     }
-
     window.addEventListener('resize', resize);
 
     function init() {
         resize();
-        const saved = localStorage.getItem('drumSetupV15');
-        window.pads = saved ? JSON.parse(saved) : [
-            { id: Date.now(), name: 'KICK', x: 50, y: 150, w: 120, h: 120, color: '#ffb3ba', volume: 1.0, muteGroup: 0, useVelocity: true, pitch: 1.0 }
+        window.pads = [
+            { id: 1, name: 'KICK', rx: 0.1, ry: 0.6, rw: 0.25, rh: 0.25, color: '#FF3B30', volume: 1, pitch: 1, muteGroup: 0, useVelocity: true }
         ];
-        window.loadAudioFiles();
         render();
     }
 
-    const snap = (v) => Math.round(v / GRID) * GRID;
-
-    async function playSound(pad, vel) {
+    async function playSound(pad, velocity = 1.0) {
         if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         if (audioCtx.state === 'suspended') audioCtx.resume();
+        if (!audioBuffers[pad.id]) return;
 
+        // Mute Group Logic
         if (pad.muteGroup > 0 && activeSources[pad.muteGroup]) {
-            activeSources[pad.muteGroup].forEach(s => {
-                s.g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.03);
-                try { s.s.stop(audioCtx.currentTime + 0.03); } catch(e){}
+            activeSources[pad.muteGroup].forEach(src => {
+                src.gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
+                setTimeout(() => src.node.stop(), 50);
             });
             activeSources[pad.muteGroup] = [];
         }
 
+        const s = audioCtx.createBufferSource();
         const g = audioCtx.createGain();
-        const finalVel = (pad.useVelocity !== false) ? vel : 1.0;
-        g.gain.setValueAtTime(pad.volume * finalVel * 0.8, audioCtx.currentTime);
-        g.connect(audioCtx.destination);
+        const v = pad.useVelocity ? velocity : 1.0;
 
-        if (audioBuffers[pad.id]) {
-            const s = audioCtx.createBufferSource();
-            s.buffer = audioBuffers[pad.id];
-            s.playbackRate.value = pad.pitch || 1.0; 
-            s.connect(g); s.start();
-            if (pad.muteGroup > 0) {
-                if (!activeSources[pad.muteGroup]) activeSources[pad.muteGroup] = [];
-                activeSources[pad.muteGroup].push({ s, g });
-            }
+        s.buffer = audioBuffers[pad.id];
+        s.playbackRate.value = pad.pitch || 1.0;
+        g.gain.value = (pad.volume || 1.0) * v;
+
+        s.connect(g); g.connect(audioCtx.destination);
+        s.start();
+
+        if (pad.muteGroup > 0) {
+            if (!activeSources[pad.muteGroup]) activeSources[pad.muteGroup] = [];
+            activeSources[pad.muteGroup].push({ node: s, gain: g });
         }
     }
 
     function render() {
-        ctx.fillStyle = '#050505';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        
-        window.pads.forEach(p => {
-            const hit = activeHits[p.id];
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        window.pads.forEach((p) => {
+            const pos = getScreenPos(p);
+            const isHit = activeHits[p.id];
             
-            // Draw Shadow
-            if (hit && !isEditMode) { 
-                ctx.shadowBlur = 30; 
-                ctx.shadowColor = p.color; 
-            }
+            ctx.fillStyle = isHit ? p.color : (isEditMode ? '#222' : '#111');
+            ctx.shadowBlur = isHit ? 30 : 0;
+            ctx.shadowColor = p.color;
             
-            // Draw Body
-            ctx.fillStyle = hit && !isEditMode ? p.color : (isEditMode ? '#1a1a1c' : '#111');
-            ctx.beginPath(); 
-            ctx.roundRect(p.x, p.y, p.w, p.h, 15); 
+            ctx.beginPath();
+            ctx.roundRect(pos.x, pos.y, pos.w, pos.h, 15);
             ctx.fill();
             
-            // Draw Border
-            ctx.shadowBlur = 0; 
-            ctx.strokeStyle = p.color; 
+            ctx.shadowBlur = 0;
+            ctx.strokeStyle = p.color;
             ctx.lineWidth = isEditMode ? 2 : 1;
-            ctx.globalAlpha = isEditMode ? 1.0 : 0.3; 
-            ctx.stroke(); 
-            ctx.globalAlpha = 1.0;
-            
-            // Draw Label
-            ctx.fillStyle = hit && !isEditMode ? '#000' : 'white'; 
+            ctx.stroke();
+
+            ctx.fillStyle = isHit ? '#000' : '#fff';
+            ctx.font = `bold ${Math.min(pos.w/4, 16)}px sans-serif`;
             ctx.textAlign = 'center';
-            ctx.font = `bold ${Math.min(p.w/5, 14)}px sans-serif`; 
-            ctx.fillText(p.name, p.x + p.w/2, p.y + p.h/2 + 5);
-            
+            ctx.fillText(p.name, pos.x + pos.w/2, pos.y + pos.h/2 + 5);
+
             if (isEditMode) {
-                ctx.fillStyle = p.color; 
+                ctx.fillStyle = '#fff';
                 ctx.beginPath();
-                ctx.arc(p.x + p.w, p.y + p.h, 10, 0, Math.PI*2); 
+                ctx.arc(pos.x + pos.w, pos.y + pos.h, 10, 0, Math.PI*2);
                 ctx.fill();
             }
         });
         requestAnimationFrame(render);
     }
 
-    // --- Interaction ---
     canvas.addEventListener('touchstart', (e) => {
         e.preventDefault();
-        const touches = e.changedTouches;
-        for (let i = 0; i < touches.length; i++) {
-            const t = touches[i];
+        [...e.changedTouches].forEach(t => {
             const mx = t.clientX, my = t.clientY;
-
-            for (let j = window.pads.length - 1; j >= 0; j--) {
-                const p = window.pads[j];
+            window.pads.forEach((p, i) => {
+                const pos = getScreenPos(p);
                 if (isEditMode) {
-                    if (Math.hypot(mx - (p.x + p.w), my - (p.y + p.h)) < 35) {
-                        activeTouches[t.identifier] = { type: 'resize', index: j, sw: p.w, sh: p.h, sx: mx, sy: my };
-                        return; 
-                    }
-                    if (mx > p.x && mx < p.x + p.w && my > p.y && my < p.y + p.h) {
-                        activeTouches[t.identifier] = { type: 'drag', index: j, ox: mx - p.x, oy: my - p.y, moved: false };
+                    if (Math.hypot(mx - (pos.x + pos.w), my - (pos.y + pos.h)) < 35) {
+                        activeTouches[t.identifier] = { type: 'resize', index: i };
+                    } else if (mx > pos.x && mx < pos.x + pos.w && my > pos.y && my < pos.y + pos.h) {
+                        activeTouches[t.identifier] = { type: 'drag', index: i, ox: (mx - pos.x)/canvas.width, oy: (my - pos.y)/canvas.height };
                         const tid = t.identifier;
-                        setTimeout(() => { if(activeTouches[tid] && !activeTouches[tid].moved) openModal(j); }, 250);
-                        return;
+                        setTimeout(() => { if(activeTouches[tid]) openModal(i); }, 300);
                     }
                 } else {
-                    if (mx > p.x && mx < p.x + p.w && my > p.y && my < p.y + p.h) {
-                        const dX = Math.abs(mx - (p.x + p.w/2)) / (p.w/2);
-                        const dY = Math.abs(my - (p.y + p.h/2)) / (p.h/2);
-                        const vel = Math.max(0.1, 1.0 - Math.max(dX, dY));
+                    if (mx > pos.x && mx < pos.x + pos.w && my > pos.y && my < pos.y + pos.h) {
+                        // Velocity calculation based on center hit
+                        const distToCenter = Math.hypot(mx - (pos.x + pos.w/2), my - (pos.y + pos.h/2));
+                        const maxDist = Math.hypot(pos.w/2, pos.h/2);
+                        const vel = Math.max(0.2, 1.0 - (distToCenter / maxDist));
+
                         activeHits[p.id] = true;
-                        setTimeout(() => delete activeHits[p.id], 80);
                         playSound(p, vel);
-                        return; 
+                        setTimeout(() => delete activeHits[p.id], 100);
                     }
                 }
-            }
-        }
-    }, {passive: false});
+            });
+        });
+    });
 
     canvas.addEventListener('touchmove', (e) => {
         e.preventDefault();
-        for (let i = 0; i < e.changedTouches.length; i++) {
-            const t = e.changedTouches[i];
+        [...e.changedTouches].forEach(t => {
             const data = activeTouches[t.identifier];
-            if (!data) continue;
+            if (!data) return;
             const p = window.pads[data.index];
             if (data.type === 'resize') {
-                p.w = snap(Math.max(60, data.sw + (t.clientX - data.sx)));
-                p.h = snap(Math.max(60, data.sh + (t.clientY - data.sy)));
+                p.rw = Math.max(0.05, (t.clientX - (p.rx * canvas.width)) / canvas.width);
+                p.rh = Math.max(0.05, (t.clientY - (p.ry * canvas.height)) / canvas.height);
             } else if (data.type === 'drag') {
-                data.moved = true;
-                p.x = snap(t.clientX - data.ox);
-                p.y = snap(t.clientY - data.oy);
+                p.rx = (t.clientX / canvas.width) - data.ox;
+                p.ry = (t.clientY / canvas.height) - data.oy;
             }
-        }
-    }, {passive: false});
-
-    canvas.addEventListener('touchend', (e) => { 
-        for (let i = 0; i < e.changedTouches.length; i++) {
-            delete activeTouches[e.changedTouches[i].identifier];
-        }
-        if(isEditMode) syncData(); 
+        });
     });
 
-    function openModal(idx) {
-        selectedPadIndex = idx;
-        const p = window.pads[idx];
+    canvas.addEventListener('touchend', (e) => {
+        [...e.changedTouches].forEach(t => delete activeTouches[t.identifier]);
+        if (isEditMode) sync();
+    });
+
+    function openModal(i) {
+        selectedPadIndex = i;
+        const p = window.pads[i];
         document.getElementById('pName').value = p.name;
-        document.getElementById('pGroup').value = p.muteGroup;
-        document.getElementById('pVol').value = p.volume;
+        document.getElementById('pGroup').value = p.muteGroup || 0;
+        document.getElementById('pVol').value = p.volume || 1.0;
         document.getElementById('pPitch').value = p.pitch || 1.0;
-        document.getElementById('pColor').value = p.color;
         document.getElementById('pSens').checked = p.useVelocity !== false;
+        document.getElementById('pColor').value = p.color;
+        document.getElementById('pAudio').value = "";
         document.getElementById('editModal').style.display = 'block';
     }
-
-    document.getElementById('pPitch').oninput = function() {
-        document.getElementById('pitchLabel').innerText = `Pitch Tuning (${this.value})`;
-    };
 
     document.getElementById('btnSaveAction').onclick = async () => {
         let p = window.pads[selectedPadIndex];
@@ -340,39 +262,39 @@
         p.muteGroup = parseInt(document.getElementById('pGroup').value) || 0;
         p.volume = parseFloat(document.getElementById('pVol').value);
         p.pitch = parseFloat(document.getElementById('pPitch').value);
-        p.color = document.getElementById('pColor').value;
         p.useVelocity = document.getElementById('pSens').checked;
+        p.color = document.getElementById('pColor').value;
         
         const file = document.getElementById('pAudio').files[0];
         if (file) {
-            const b = await file.arrayBuffer();
-            await saveAudioFile(p.id, b);
-            if (!audioCtx) audioCtx = new AudioContext();
-            audioBuffers[p.id] = await audioCtx.decodeAudioData(b.slice(0));
+            const ext = file.name.split('.').pop().toLowerCase();
+            if(ext !== 'wav' && ext !== 'mp3') { alert("Gunakan .wav atau .mp3"); return; }
+            const buffer = await file.arrayBuffer();
+            audioBuffers[p.id] = await (audioCtx || new AudioContext()).decodeAudioData(buffer);
         }
-        syncData(); closeModal();
+        sync();
+        document.getElementById('editModal').style.display = 'none';
     };
 
-    function closeModal() { document.getElementById('editModal').style.display = 'none'; }
-    document.getElementById('btnCloseAction').onclick = closeModal;
-    document.getElementById('btnDeleteAction').onclick = () => { window.pads.splice(selectedPadIndex, 1); syncData(); closeModal(); };
-
-    function syncData() {
-        localStorage.setItem('drumSetupV15', JSON.stringify(window.pads));
+    function sync() {
         if (window.saveToCloud) window.saveToCloud(window.pads);
+        localStorage.setItem('drumV15_local', JSON.stringify(window.pads));
     }
-    
+
     document.getElementById('editBtn').onclick = (e) => {
         isEditMode = !isEditMode;
-        e.target.innerText = isEditMode ? 'SIMPAN' : 'MODE: PLAY';
+        e.target.innerText = isEditMode ? 'SAVE & PLAY' : 'PLAY MODE';
         e.target.classList.toggle('active');
         document.getElementById('addBtn').style.display = isEditMode ? 'block' : 'none';
     };
 
     document.getElementById('addBtn').onclick = () => {
-        window.pads.push({ id: Date.now(), name: 'NEW', x: 50, y: 150, w: 100, h: 100, color: '#007AFF', volume: 1.0, muteGroup: 0, useVelocity: true, pitch: 1.0 });
-        syncData();
+        window.pads.push({ id: Date.now(), name: 'NEW', rx: 0.4, ry: 0.4, rw: 0.15, rh: 0.15, color: '#007AFF', volume: 1, pitch: 1, muteGroup: 0, useVelocity: true });
+        sync();
     };
+
+    document.getElementById('btnCloseAction').onclick = () => document.getElementById('editModal').style.display = 'none';
+    document.getElementById('btnDeleteAction').onclick = () => { window.pads.splice(selectedPadIndex, 1); sync(); document.getElementById('editModal').style.display = 'none'; };
 
     init();
 </script>
