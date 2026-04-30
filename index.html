@@ -5,46 +5,57 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Pro Drum v15 - Cloud Sync</title>
+    <title>Pro Drum v15 - Cloud Sync Responsive</title>
     <style>
-        body { margin: 0; background: #050505; overflow: hidden; font-family: -apple-system, sans-serif; -webkit-user-select: none; color: white; }
-        canvas { display: block; touch-action: none; }
-        #ui { position: absolute; top: 30px; left: 20px; display: flex; gap: 10px; z-index: 100; }
+        :root { --safe-top: env(safe-area-inset-top); --safe-bottom: env(safe-area-inset-bottom); }
+        body { margin: 0; background: #050505; overflow: hidden; font-family: -apple-system, sans-serif; -webkit-user-select: none; color: white; height: 100vh; width: 100vw; }
+        canvas { display: block; touch-action: none; width: 100%; height: 100%; }
+        
+        #ui { 
+            position: absolute; 
+            top: calc(10px + var(--safe-top)); 
+            left: 20px; 
+            display: flex; 
+            gap: 10px; 
+            z-index: 100; 
+        }
+        
         button { 
-            padding: 14px 20px; border-radius: 12px; border: 1px solid #333; 
+            padding: 12px 18px; border-radius: 12px; border: 1px solid #333; 
             background: rgba(26, 26, 26, 0.8); color: white; font-weight: bold; 
-            backdrop-filter: blur(10px); cursor: pointer;
+            backdrop-filter: blur(10px); cursor: pointer; font-size: 13px;
         }
         button.active { background: #007AFF; border-color: #5AC8FA; }
+        
         #editModal {
             display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: #1c1c1e; padding: 25px; border-radius: 24px; border: 1px solid #333;
-            z-index: 200; width: 300px; box-shadow: 0 0 100px rgba(0,0,0,1);
-            max-height: 80vh; overflow-y: auto;
+            background: #1c1c1e; padding: 20px; border-radius: 24px; border: 1px solid #444;
+            z-index: 200; width: 85%; max-width: 320px; box-shadow: 0 0 100px rgba(0,0,0,1);
+            max-height: 85vh; overflow-y: auto;
         }
         .field { margin-bottom: 12px; }
-        label { display: block; font-size: 11px; color: #888; margin-bottom: 4px; text-transform: uppercase; }
+        label { display: block; font-size: 10px; color: #888; margin-bottom: 4px; text-transform: uppercase; }
         input[type="text"], input[type="range"], input[type="number"] { 
             width: 100%; box-sizing: border-box; background: #000; border: 1px solid #333; 
-            color: white; padding: 10px; border-radius: 10px; 
+            color: white; padding: 10px; border-radius: 10px; font-size: 16px; /* Mencegah auto-zoom di iOS */
         }
         .switch-row { display: flex; justify-content: space-between; align-items: center; background: #000; padding: 10px; border-radius: 10px; border: 1px solid #333; }
         .m-btns { display: flex; flex-direction: column; gap: 8px; margin-top: 15px; }
-        .btn-save { background: #007AFF; border: none; padding: 12px; font-weight: bold; color: white; border-radius: 10px; }
-        #status { position: fixed; bottom: 10px; right: 10px; font-size: 10px; color: #555; }
+        .btn-save { background: #007AFF; border: none; padding: 14px; font-weight: bold; color: white; border-radius: 10px; }
+        #status { position: fixed; bottom: calc(5px + var(--safe-bottom)); right: 10px; font-size: 9px; color: #444; }
     </style>
 </head>
 <body>
 
     <div id="ui">
         <button id="editBtn">MODE: PLAY</button>
-        <button id="addBtn" style="display:none;">+ TAMBAH PAD</button>
+        <button id="addBtn" style="display:none;">+ PAD</button>
     </div>
 
     <div id="status">Cloud Sync: Active</div>
 
     <div id="editModal">
-        <h3 style="margin:0 0 15px 0">Edit Pad</h3>
+        <h3 style="margin:0 0 15px 0; font-size: 18px;">Edit Pad</h3>
         <div class="field"><label>Nama Pad</label><input type="text" id="pName"></div>
         <div class="field"><label>Mute Group</label><input type="number" id="pGroup" min="0"></div>
         <div class="field"><label>Volume</label><input type="range" id="pVol" min="0" max="1" step="0.01"></div>
@@ -61,7 +72,7 @@
         <div class="m-btns">
             <button class="btn-save" id="btnSaveAction">Simpan</button>
             <button id="btnDeleteAction" style="background:#FF3B30; border:none; padding:10px; color:white; border-radius:10px;">Hapus</button>
-            <button id="btnCloseAction" style="background:none; border:none; color:#555">Batal</button>
+            <button id="btnCloseAction" style="background:none; border:none; color:#555; padding: 8px;">Batal</button>
         </div>
     </div>
 
@@ -85,12 +96,10 @@
     const db = getDatabase(app);
     const drumRef = ref(db, 'drumLayout/global');
 
-    // Bridge ke global scope agar bisa dipanggil script non-module
     window.saveToCloud = (data) => {
         set(drumRef, data);
     };
 
-    // Listen data dari cloud
     onValue(drumRef, (snapshot) => {
         const data = snapshot.val();
         if (data) {
@@ -106,11 +115,10 @@
     let audioCtx, isEditMode = false, selectedPadIndex = null;
     window.pads = []; 
     let audioBuffers = {}, activeSources = {}, activeHits = {}, activeTouches = {}; 
-    const GRID = 20;
+    const GRID = 10;
     const dbName = "DrumAudioDB";
     const storeName = "samples";
 
-    // --- Database & Storage Logic ---
     function openDB() {
         return new Promise((resolve, reject) => {
             const request = indexedDB.open(dbName, 1);
@@ -130,7 +138,6 @@
         const db = await openDB();
         const tx = db.transaction(storeName, "readonly");
         const store = tx.objectStore(storeName);
-        
         for (let p of window.pads) {
             const request = store.get(p.id);
             request.onsuccess = async () => {
@@ -142,11 +149,35 @@
         }
     }
 
+    // --- RESPONSIVE LOGIC ---
+    let lastW = window.innerWidth;
+    let lastH = window.innerHeight;
+
+    function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
+        // Sesuaikan posisi pad saat layar berputar/berubah ukuran
+        const ratioX = canvas.width / lastW;
+        const ratioY = canvas.height / lastH;
+        
+        window.pads.forEach(p => {
+            p.x *= ratioX;
+            p.y *= ratioY;
+            // Opsional: p.w *= ratioX; (Jika ingin ukuran pad ikut mengecil)
+        });
+        
+        lastW = canvas.width;
+        lastH = canvas.height;
+    }
+
+    window.addEventListener('resize', resize);
+
     function init() {
-        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+        resize();
         const saved = localStorage.getItem('drumSetupV15');
         window.pads = saved ? JSON.parse(saved) : [
-            { id: Date.now(), name: 'KICK', x: 100, y: 100, w: 200, h: 200, color: '#ffb3ba', volume: 1.0, muteGroup: 0, useVelocity: true, pitch: 1.0 }
+            { id: Date.now(), name: 'KICK', x: 50, y: 150, w: 120, h: 120, color: '#ffb3ba', volume: 1.0, muteGroup: 0, useVelocity: true, pitch: 1.0 }
         ];
         window.loadAudioFiles();
         render();
@@ -161,7 +192,7 @@
         if (pad.muteGroup > 0 && activeSources[pad.muteGroup]) {
             activeSources[pad.muteGroup].forEach(s => {
                 s.g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.03);
-                s.s.stop(audioCtx.currentTime + 0.03);
+                try { s.s.stop(audioCtx.currentTime + 0.03); } catch(e){}
             });
             activeSources[pad.muteGroup] = [];
         }
@@ -186,42 +217,66 @@
     function render() {
         ctx.fillStyle = '#050505';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
         window.pads.forEach(p => {
             const hit = activeHits[p.id];
-            if (hit && !isEditMode) { ctx.shadowBlur = 40; ctx.shadowColor = p.color; }
+            
+            // Draw Shadow
+            if (hit && !isEditMode) { 
+                ctx.shadowBlur = 30; 
+                ctx.shadowColor = p.color; 
+            }
+            
+            // Draw Body
             ctx.fillStyle = hit && !isEditMode ? p.color : (isEditMode ? '#1a1a1c' : '#111');
-            ctx.beginPath(); ctx.roundRect(p.x, p.y, p.w, p.h, 20); ctx.fill();
-            ctx.shadowBlur = 0; ctx.strokeStyle = p.color; ctx.lineWidth = isEditMode ? 2 : 1;
-            ctx.globalAlpha = isEditMode ? 1.0 : 0.2; ctx.stroke(); ctx.globalAlpha = 1.0;
-            ctx.fillStyle = hit && !isEditMode ? '#000' : 'white'; ctx.textAlign = 'center';
-            ctx.font = 'bold 15px sans-serif'; ctx.fillText(p.name, p.x + p.w/2, p.y + p.h/2 + 5);
+            ctx.beginPath(); 
+            ctx.roundRect(p.x, p.y, p.w, p.h, 15); 
+            ctx.fill();
+            
+            // Draw Border
+            ctx.shadowBlur = 0; 
+            ctx.strokeStyle = p.color; 
+            ctx.lineWidth = isEditMode ? 2 : 1;
+            ctx.globalAlpha = isEditMode ? 1.0 : 0.3; 
+            ctx.stroke(); 
+            ctx.globalAlpha = 1.0;
+            
+            // Draw Label
+            ctx.fillStyle = hit && !isEditMode ? '#000' : 'white'; 
+            ctx.textAlign = 'center';
+            ctx.font = `bold ${Math.min(p.w/5, 14)}px sans-serif`; 
+            ctx.fillText(p.name, p.x + p.w/2, p.y + p.h/2 + 5);
+            
             if (isEditMode) {
-                ctx.fillStyle = p.color; ctx.beginPath();
-                ctx.arc(p.x + p.w, p.y + p.h, 12, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = p.color; 
+                ctx.beginPath();
+                ctx.arc(p.x + p.w, p.y + p.h, 10, 0, Math.PI*2); 
+                ctx.fill();
             }
         });
         requestAnimationFrame(render);
     }
 
-    // --- Interaction Logic ---
+    // --- Interaction ---
     canvas.addEventListener('touchstart', (e) => {
         e.preventDefault();
-        for (let i = 0; i < e.changedTouches.length; i++) {
-            const t = e.changedTouches[i];
+        const touches = e.changedTouches;
+        for (let i = 0; i < touches.length; i++) {
+            const t = touches[i];
             const mx = t.clientX, my = t.clientY;
 
             for (let j = window.pads.length - 1; j >= 0; j--) {
                 const p = window.pads[j];
                 if (isEditMode) {
-                    if (Math.hypot(mx - (p.x + p.w), my - (p.y + p.h)) < 40) {
+                    if (Math.hypot(mx - (p.x + p.w), my - (p.y + p.h)) < 35) {
                         activeTouches[t.identifier] = { type: 'resize', index: j, sw: p.w, sh: p.h, sx: mx, sy: my };
-                        break; 
+                        return; 
                     }
                     if (mx > p.x && mx < p.x + p.w && my > p.y && my < p.y + p.h) {
                         activeTouches[t.identifier] = { type: 'drag', index: j, ox: mx - p.x, oy: my - p.y, moved: false };
                         const tid = t.identifier;
                         setTimeout(() => { if(activeTouches[tid] && !activeTouches[tid].moved) openModal(j); }, 250);
-                        break;
+                        return;
                     }
                 } else {
                     if (mx > p.x && mx < p.x + p.w && my > p.y && my < p.y + p.h) {
@@ -229,14 +284,14 @@
                         const dY = Math.abs(my - (p.y + p.h/2)) / (p.h/2);
                         const vel = Math.max(0.1, 1.0 - Math.max(dX, dY));
                         activeHits[p.id] = true;
-                        setTimeout(() => delete activeHits[p.id], 100);
+                        setTimeout(() => delete activeHits[p.id], 80);
                         playSound(p, vel);
-                        break; 
+                        return; 
                     }
                 }
             }
         }
-    });
+    }, {passive: false});
 
     canvas.addEventListener('touchmove', (e) => {
         e.preventDefault();
@@ -246,22 +301,23 @@
             if (!data) continue;
             const p = window.pads[data.index];
             if (data.type === 'resize') {
-                p.w = snap(Math.max(80, data.sw + (t.clientX - data.sx)));
-                p.h = snap(Math.max(80, data.sh + (t.clientY - data.sy)));
+                p.w = snap(Math.max(60, data.sw + (t.clientX - data.sx)));
+                p.h = snap(Math.max(60, data.sh + (t.clientY - data.sy)));
             } else if (data.type === 'drag') {
                 data.moved = true;
                 p.x = snap(t.clientX - data.ox);
                 p.y = snap(t.clientY - data.oy);
             }
         }
-    });
+    }, {passive: false});
 
-    canvas.addEventListener('touchend', () => { 
-        activeTouches = {}; 
+    canvas.addEventListener('touchend', (e) => { 
+        for (let i = 0; i < e.changedTouches.length; i++) {
+            delete activeTouches[e.changedTouches[i].identifier];
+        }
         if(isEditMode) syncData(); 
     });
 
-    // --- UI Controls ---
     function openModal(idx) {
         selectedPadIndex = idx;
         const p = window.pads[idx];
@@ -299,11 +355,7 @@
 
     function closeModal() { document.getElementById('editModal').style.display = 'none'; }
     document.getElementById('btnCloseAction').onclick = closeModal;
-    
-    document.getElementById('btnDeleteAction').onclick = () => {
-        window.pads.splice(selectedPadIndex, 1);
-        syncData(); closeModal();
-    };
+    document.getElementById('btnDeleteAction').onclick = () => { window.pads.splice(selectedPadIndex, 1); syncData(); closeModal(); };
 
     function syncData() {
         localStorage.setItem('drumSetupV15', JSON.stringify(window.pads));
@@ -318,7 +370,7 @@
     };
 
     document.getElementById('addBtn').onclick = () => {
-        window.pads.push({ id: Date.now(), name: 'NEW', x: 50, y: 50, w: 150, h: 150, color: '#bae1ff', volume: 1.0, muteGroup: 0, useVelocity: true, pitch: 1.0 });
+        window.pads.push({ id: Date.now(), name: 'NEW', x: 50, y: 150, w: 100, h: 100, color: '#007AFF', volume: 1.0, muteGroup: 0, useVelocity: true, pitch: 1.0 });
         syncData();
     };
 
