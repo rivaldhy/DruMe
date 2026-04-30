@@ -8,10 +8,7 @@
     <title>Pro Drum v15 - Pitch Tuning & Audio Persistent</title>
     <style>
         body { margin: 0; background: #050505; overflow: hidden; font-family: -apple-system, sans-serif; -webkit-user-select: none; color: white; }
-        /* Tambahkan ke dalam tag <style> */
-   	  canvas { filter: drop-shadow(0 0 10px rgba(0,0,0,0.5)); }
-		  .active-glow { transition: opacity 0.1s ease-out; }
-
+        canvas { display: block; touch-action: none; }
         #ui { position: absolute; top: 30px; left: 20px; display: flex; gap: 10px; z-index: 100; }
         button { 
             padding: 14px 20px; border-radius: 12px; border: 1px solid #333; 
@@ -67,29 +64,7 @@
 
     <canvas id="canvas"></canvas>
 
-<script type="module">
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-analytics.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
-
-  // Your web app's Firebase configuration
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-  const firebaseConfig = {
-    apiKey: "AIzaSyDd1_GfXEAubvEym0mYkXiz8SUZ35FtodY",
-    authDomain: "databersama.firebaseapp.com",
-    databaseURL: "https://databersama-default-rtdb.firebaseio.com",
-    projectId: "databersama",
-    storageBucket: "databersama.firebasestorage.app",
-    messagingSenderId: "699549114383",
-    appId: "1:699549114383:web:1719fedbdde88a2ddb437a",
-    measurementId: "G-XF3PX0RPQ2"
-  };
-
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
+<script>
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
     let audioCtx, isEditMode = false, pads = [], audioBuffers = {}, activeSources = {}, activeHits = {};
