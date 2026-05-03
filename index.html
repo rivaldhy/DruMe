@@ -2,274 +2,359 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Aesthetic Kalimba - Modular Firebase</title>
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pitch Master Pro | Firebase Edition</title>
     <style>
+        /* CSS tetap sama seperti sebelumnya */
         :root {
-            --wood-dark: #4e342e;
-            --wood-medium: #795548;
-            --wood-light: #d7ccc8;
-            --accent: #d4e157;
-            --ivory: #fffcf5;
+            --primary: #6366f1;
+            --accent: #f43f5e;
+            --bg: #0f172a;
+            --card: rgba(30, 41, 59, 0.7);
+            --text: #f8fafc;
+            --success: #10b981;
         }
-
-        * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
 
         body { 
-            background: #fdfaf6; 
-            background-image: radial-gradient(var(--wood-light) 1px, transparent 1px);
-            background-size: 30px 30px;
-            color: var(--wood-dark); 
-            font-family: 'Segoe UI', sans-serif; 
-            margin: 0; 
-            display: flex; 
-            flex-direction: column; 
-            height: 100vh; 
+            font-family: 'Inter', system-ui, sans-serif;
+            background: radial-gradient(circle at top right, #1e1b4b, #020617);
+            color: var(--text); margin: 0; display: flex; align-items: center; justify-content: center; min-height: 100vh;
             overflow: hidden;
         }
+
+        .glass-card { 
+            background: var(--card); backdrop-filter: blur(20px);
+            padding: 40px; border-radius: 32px; border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 90%; max-width: 480px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+        }
+
+        .screen { display: none; animation: fadeIn 0.5s ease-out; }
+        .screen.active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 { font-size: 2.5rem; margin-bottom: 0.5rem; background: linear-gradient(to right, #818cf8, #f43f5e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+        .mode-btn {
+            width: 100%; padding: 18px; margin: 12px 0; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.05); color: white; cursor: pointer; font-weight: 600; transition: all 0.2s;
+            font-size: 1rem;
+        }
+        .mode-btn:hover { background: var(--primary); transform: scale(1.02); }
+
+        .level-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin: 20px 0; }
+
+        .status-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .player-tag { background: var(--primary); padding: 6px 16px; border-radius: 99px; font-size: 0.75rem; font-weight: 700; letter-spacing: 1px; }
         
-        #header-panel { 
-            padding: 15px; 
-            background: var(--wood-dark); 
-            color: white; 
-            display: flex; 
-            flex-direction: column;
-            gap: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        .timer-container { width: 100%; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; margin: 15px 0; overflow: hidden; }
+        #timerBar { width: 100%; height: 100%; background: var(--accent); transition: width 1s linear; }
+
+        .wave-container {
+            width: 100%; height: 180px; background: #020617; border-radius: 24px;
+            position: relative; margin-bottom: 25px; border: 1px solid rgba(255,255,255,0.05);
+            overflow: hidden; cursor: ew-resize;
+        }
+        canvas { width: 100%; height: 100%; }
+
+        .action-btn { width: 100%; padding: 18px; border: none; border-radius: 16px; font-weight: 700; cursor: pointer; transition: 0.2s; font-size: 1rem; }
+        .btn-play { background: #fff; color: #000; box-shadow: 0 4px 15px rgba(255,255,255,0.2); }
+        .btn-check { background: var(--success); color: white; display: none; }
+        .btn-next { background: var(--success); color: white; margin-top: 10px; display: none; }
+
+        #gameMsg { height: 40px; font-size: 0.9rem; color: #94a3b8; font-weight: 500; }
+        .rank-item { display: flex; justify-content: space-between; padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        
+        input[type="number"], input[type="text"] { 
+            background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); 
+            color: white; padding: 12px; border-radius: 12px; text-align: center; width: 100%; box-sizing: border-box;
+            margin-bottom: 10px;
         }
 
-        .input-group { display: flex; gap: 8px; justify-content: center; }
-
-        input { 
-            padding: 10px; 
-            border-radius: 20px; 
-            border: 1px solid var(--wood-medium); 
-            background: rgba(255,255,255,0.1); 
-            color: white; 
-            outline: none;
-            width: 140px;
-        }
-
-        button { 
-            padding: 10px 15px; 
-            border-radius: 20px; 
-            border: none; 
-            background: var(--accent); 
-            font-weight: bold; 
-            cursor: pointer;
-        }
-
-        #status-text { font-size: 0.75rem; text-align: center; color: var(--wood-light); }
-
-        #main-stage { 
-            flex: 1; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-        }
-
-        #note-circle { 
-            width: 140px; height: 140px; 
-            border: 10px solid var(--wood-medium); 
-            border-radius: 50%; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            background: white; 
-            font-size: 3.5rem; 
-            font-weight: bold;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            transition: 0.1s;
-        }
-
-        #keyboard-container {
-            background: var(--wood-medium);
-            padding: 20px 10px 40px 10px;
-            border-radius: 30px 30px 0 0;
-            display: flex;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .key {
-            flex: 1; max-width: 50px; height: 130px;
-            background: var(--ivory);
-            border-radius: 0 0 12px 12px;
-            display: flex; 
-            align-items: flex-end; 
-            justify-content: center;
-            padding-bottom: 15px; 
-            font-weight: bold;
-            box-shadow: 0 6px 0 var(--wood-dark);
-            cursor: pointer;
-            transition: 0.05s;
-        }
-
-        .key:active {
-            transform: translateY(4px);
-            box-shadow: 0 2px 0 var(--wood-dark);
-            background: var(--accent);
-        }
-
-        .key.remote-active {
-            background: #ffccbc;
-            transform: translateY(3px);
-        }
+        #playerNamesContainer { max-height: 200px; overflow-y: auto; margin: 15px 0; padding-right: 5px; }
     </style>
 </head>
 <body>
 
-    <div id="header-panel">
-        <div class="input-group">
-            <input type="text" id="roomInput" placeholder="ID Room">
-            <button id="connectBtn">CONNECT</button>
+<div class="glass-card">
+    <div id="lobby" class="screen active">
+        <h1>Pitch Master</h1>
+        <div style="margin-bottom: 20px;">
+            <label style="font-size: 0.8rem; color: #94a3b8;">NAMA PLAYER (SOLO)</label><br>
+            <input type="text" id="playerNameInput" placeholder="Masukkan Nama...">
         </div>
-        <div id="status-text">Status: Offline</div>
+        <button class="mode-btn" id="btnShowLevel">🎯 LEVEL MODE</button>
+        <button class="mode-btn" id="btnSoloFree">👤 SOLO FREEPLAY</button>
+        <button class="mode-btn" id="btnMultiplayer">👥 MULTI PLAYER</button>
+        
+        <div id="multi-setup" style="display:none; margin-top: 20px; padding: 20px; background: rgba(0,0,0,0.2); border-radius: 20px;">
+            <label style="display: block; font-size: 0.8rem; margin-bottom: 10px;">JUMLAH PEMAIN</label>
+            <input type="number" id="playerCount" min="2" max="10" value="2">
+            <div id="playerNamesContainer"></div>
+            <button class="action-btn btn-play" id="btnStartBattle" style="margin-top: 15px;">START BATTLE</button>
+        </div>
     </div>
 
-    <div id="main-stage">
-        <div id="note-circle">-</div>
-        <p style="margin-top: 15px; opacity: 0.5; font-size: 0.8rem;">MODULAR ENGINE v12</p>
+    <div id="level-screen" class="screen">
+        <h2>Pilih Level</h2>
+        <div id="level-grid" class="level-grid"></div>
+        <button class="mode-btn" id="btnBackLobby">KEMBALI</button>
     </div>
 
-    <div id="keyboard-container">
-        <!-- Menggunakan window.userTrigger karena ini adalah module script -->
-        <div class="key" data-note="C" onpointerdown="window.userTrigger('C')">C</div>
-        <div class="key" data-note="D" onpointerdown="window.userTrigger('D')">D</div>
-        <div class="key" data-note="E" onpointerdown="window.userTrigger('E')">E</div>
-        <div class="key" data-note="F" onpointerdown="window.userTrigger('F')">F</div>
-        <div class="key" data-note="G" onpointerdown="window.userTrigger('G')">G</div>
-        <div class="key" data-note="A" onpointerdown="window.userTrigger('A')">A</div>
-        <div class="key" data-note="B" onpointerdown="window.userTrigger('B')">B</div>
+    <div id="game-screen" class="screen">
+        <div class="status-header">
+            <div class="player-tag" id="activePlayerName">PLAYER 1</div>
+            <div id="levelIndicator" style="font-weight: bold; color: var(--accent);"></div>
+            <div id="timeLeftDisplay" style="font-weight: 800;">15s</div>
+        </div>
+        <div class="timer-container"><div id="timerBar"></div></div>
+        <div class="wave-container" id="waveBox"><canvas id="canvas"></canvas></div>
+        <div id="gameMsg">Dengarkan nada target...</div>
+        <button class="action-btn btn-play" id="btnStartTurn">MULAI GILIRAN</button>
+        <button class="action-btn btn-check" id="btnCheck">VALIDASI!</button>
     </div>
 
-    <script type="module">
-        // 1. IMPORT FIREBASE MODULAR
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+    <div id="results" class="screen">
+        <h2 id="winnerTitle">Hasil Akhir</h2>
+        <div id="leaderboard" style="margin: 20px 0;"></div>
+        <button class="action-btn btn-next" id="btnNextLevel">LEVEL BERIKUTNYA</button>
+        <button class="action-btn btn-play" onclick="location.reload()" style="margin-top:10px">MENU UTAMA</button>
+    </div>
+</div>
 
-        // CONFIG ANDA
-        const firebaseConfig = {
-            apiKey: "AIzaSyDd1_GfXEAubvEym0mYkXiz8SUZ35FtodY",
-            authDomain: "databersama.firebaseapp.com",
-            databaseURL: "https://databersama-default-rtdb.firebaseio.com",
-            projectId: "databersama",
-            storageBucket: "databersama.firebasestorage.app",
-            messagingSenderId: "699549114383",
-            appId: "1:699549114383:web:1719fedbdde88a2ddb437a",
-            measurementId: "G-XF3PX0RPQ2"
-        };
+<script type="module">
+    // --- FIREBASE INITIALIZATION ---
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // Inisialisasi
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
+    const firebaseConfig = {
+        apiKey: "AIzaSyDd1_GfXEAubvEym0mYkXiz8SUZ35FtodY",
+        authDomain: "databersama.firebaseapp.com",
+        databaseURL: "https://databersama-default-rtdb.firebaseio.com",
+        projectId: "databersama",
+        storageBucket: "databersama.firebasestorage.app",
+        messagingSenderId: "699549114383",
+        appId: "1:699549114383:web:dc489b694d69b1d1db437a"
+    };
 
-        // 2. AUDIO ENGINE (Web Audio API)
-        let audioCtx;
-        let reverbNode;
-        let masterGain;
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
 
-        function setupAudio() {
-            if (audioCtx) return;
+    // --- GAME LOGIC ---
+    const LEVELS = [
+        { id: 1, range: [300, 500], time: 20 },
+        { id: 2, range: [250, 600], time: 15 },
+        { id: 3, range: [200, 800], time: 12 },
+        { id: 4, range: [150, 1000], time: 10 },
+        { id: 5, range: [100, 1200], time: 8 }
+    ];
+
+    let audioCtx, oscillator, mainGain;
+    let gameState = {
+        mode: 'solo', currentLevelIdx: 0, totalPlayers: 1,
+        currentPlayerIdx: 0, players: [], targetFreq: 0,
+        currentFreq: 440, timer: null, timeLeft: 15, isPlaying: false
+    };
+
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    let isMouseDown = false;
+
+    // --- UI FUNCTIONS ---
+    function switchScreen(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
+
+    function generatePlayerInputs() {
+        const count = parseInt(document.getElementById('playerCount').value);
+        const container = document.getElementById('playerNamesContainer');
+        container.innerHTML = '';
+        for(let i = 1; i <= count; i++) {
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'multi-player-name';
+            input.placeholder = `Nama Player ${i}`;
+            input.value = `Player ${i}`;
+            container.appendChild(input);
+        }
+    }
+
+    // --- DATABASE FUNCTIONS ---
+    function saveScoreToFirebase(playerName, score, mode) {
+        const scoreRef = ref(db, 'scores/');
+        const newScoreRef = push(scoreRef);
+        set(newScoreRef, {
+            username: playerName,
+            score: score,
+            mode: mode,
+            timestamp: Date.now()
+        }).catch(err => console.error("Firebase Error:", err));
+    }
+
+    // --- ENGINE FUNCTIONS ---
+    function initGame(mode, levelIdx = 0) {
+        gameState.mode = mode;
+        gameState.currentLevelIdx = levelIdx;
+        
+        if (mode === 'level' || mode === 'solo') {
+            const soloName = document.getElementById('playerNameInput').value || "PLAYER";
+            gameState.players = [{ name: soloName, score: 0 }];
+            gameState.totalPlayers = 1;
+        } else {
+            const inputs = document.querySelectorAll('.multi-player-name');
+            gameState.players = Array.from(inputs).map(inp => ({ name: inp.value || "Anonymous", score: 0 }));
+            gameState.totalPlayers = gameState.players.length;
+        }
+
+        gameState.currentPlayerIdx = 0;
+        switchScreen('game-screen');
+        updateGameUI();
+    }
+
+    function updateGameUI() {
+        const p = gameState.players[gameState.currentPlayerIdx];
+        document.getElementById('activePlayerName').innerText = p.name;
+        document.getElementById('btnStartTurn').style.display = 'block';
+        document.getElementById('btnCheck').style.display = 'none';
+        document.getElementById('levelIndicator').innerText = gameState.mode.toUpperCase();
+    }
+
+    function startTurn() {
+        if (!audioCtx) {
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            masterGain = audioCtx.createGain();
-            masterGain.gain.value = 0.7;
-
-            reverbNode = audioCtx.createConvolver();
-            reverbNode.buffer = generateReverb(2.0);
-
-            reverbNode.connect(masterGain);
-            masterGain.connect(audioCtx.destination);
+            oscillator = audioCtx.createOscillator();
+            mainGain = audioCtx.createGain();
+            oscillator.type = 'sine';
+            mainGain.gain.value = 0;
+            oscillator.connect(mainGain);
+            mainGain.connect(audioCtx.destination);
+            oscillator.start();
         }
+        
+        const range = gameState.mode === 'level' ? LEVELS[gameState.currentLevelIdx].range : [200, 800];
+        gameState.targetFreq = Math.floor(Math.random() * (range[1] - range[0])) + range[0];
+        
+        // Play Target Tone
+        const tOsc = audioCtx.createOscillator();
+        const tGain = audioCtx.createGain();
+        tOsc.frequency.value = gameState.targetFreq;
+        tGain.gain.setValueAtTime(0, audioCtx.currentTime);
+        tGain.gain.linearRampToValueAtTime(0.2, audioCtx.currentTime + 0.1);
+        tGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 2.0);
+        tOsc.connect(tGain); tGain.connect(audioCtx.destination);
+        tOsc.start(); tOsc.stop(audioCtx.currentTime + 2.1);
 
-        function generateReverb(duration) {
-            const length = audioCtx.sampleRate * duration;
-            const impulse = audioCtx.createBuffer(2, length, audioCtx.sampleRate);
-            for (let c = 0; c < 2; c++) {
-                const data = impulse.getChannelData(c);
-                for (let i = 0; i < length; i++) {
-                    data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / length, 2);
-                }
-            }
-            return impulse;
+        gameState.isPlaying = true;
+        document.getElementById('btnStartTurn').style.display = 'none';
+        document.getElementById('btnCheck').style.display = 'block';
+        
+        let maxTime = gameState.mode === 'level' ? LEVELS[gameState.currentLevelIdx].time : 15;
+        gameState.timeLeft = maxTime;
+
+        clearInterval(gameState.timer);
+        gameState.timer = setInterval(() => {
+            gameState.timeLeft--;
+            document.getElementById('timeLeftDisplay').innerText = gameState.timeLeft + "s";
+            document.getElementById('timerBar').style.width = (gameState.timeLeft/maxTime*100) + "%";
+            if(gameState.timeLeft <= 0) finishTurn(0);
+        }, 1000);
+    }
+
+    function validatePitch() {
+        const diff = Math.abs(gameState.currentFreq - gameState.targetFreq);
+        let accuracy = Math.max(0, 100 - (diff / 2)); 
+        accuracy = Math.round(accuracy);
+        
+        // Simpan ke Firebase
+        saveScoreToFirebase(gameState.players[gameState.currentPlayerIdx].name, accuracy, gameState.mode);
+        
+        alert(`Skor ${gameState.players[gameState.currentPlayerIdx].name}: ${accuracy}%`);
+        finishTurn(accuracy);
+    }
+
+    function finishTurn(score) {
+        clearInterval(gameState.timer);
+        gameState.isPlaying = false;
+        gameState.players[gameState.currentPlayerIdx].score = score;
+        mainGain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.1);
+
+        if(gameState.currentPlayerIdx < gameState.totalPlayers - 1) {
+            gameState.currentPlayerIdx++;
+            updateGameUI();
+        } else {
+            showFinalResults();
         }
+    }
 
-        // 3. LOGIKA APLIKASI
-        let myId = Math.random().toString(36).substring(7);
-        let currentRoom = null;
+    function showFinalResults() {
+        switchScreen('results');
+        const board = document.getElementById('leaderboard');
+        board.innerHTML = '';
+        const sorted = [...gameState.players].sort((a,b) => b.score - a.score);
+        sorted.forEach((p, i) => {
+            board.innerHTML += `<div class="rank-item"><span>#${i+1} ${p.name}</span><span>${p.score}%</span></div>`;
+        });
+    }
 
-        // Fungsi Play (Internal)
-        function playKalimba(note, isRemote) {
-            if (!audioCtx) return;
-            if (audioCtx.state === 'suspended') audioCtx.resume();
+    // --- EVENT LISTENERS ---
+    document.getElementById('btnShowLevel').onclick = () => {
+        switchScreen('level-screen');
+        const grid = document.getElementById('level-grid');
+        grid.innerHTML = '';
+        LEVELS.forEach((lvl, i) => {
+            const b = document.createElement('button');
+            b.className = 'mode-btn'; b.innerText = `Level ${lvl.id}`;
+            b.onclick = () => initGame('level', i);
+            grid.appendChild(b);
+        });
+    };
 
-            const freqs = { 'C': 261.63, 'D': 293.66, 'E': 329.63, 'F': 349.23, 'G': 392.00, 'A': 440.00, 'B': 493.88 };
-            
-            // UI Feedback
-            const display = document.getElementById('note-circle');
-            display.innerText = note;
-            display.style.transform = "scale(1.1)";
-            setTimeout(() => display.style.transform = "scale(1)", 100);
+    document.getElementById('btnSoloFree').onclick = () => initGame('solo');
+    document.getElementById('btnMultiplayer').onclick = () => {
+        document.getElementById('multi-setup').style.display = 'block';
+        generatePlayerInputs();
+    };
+    document.getElementById('playerCount').onchange = generatePlayerInputs;
+    document.getElementById('btnStartBattle').onclick = () => initGame('multi');
+    document.getElementById('btnBackLobby').onclick = () => switchScreen('lobby');
+    document.getElementById('btnStartTurn').onclick = startTurn;
+    document.getElementById('btnCheck').onclick = validatePitch;
 
-            if (isRemote) {
-                const el = document.querySelector(`.key[data-note="${note}"]`);
-                el.classList.add('remote-active');
-                setTimeout(() => el.classList.remove('remote-active'), 200);
-            }
-
-            // Synth
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.type = 'triangle';
-            osc.frequency.setValueAtTime(freqs[note], audioCtx.currentTime);
-            
-            gain.gain.setValueAtTime(0, audioCtx.currentTime);
-            gain.gain.linearRampToValueAtTime(0.4, audioCtx.currentTime + 0.01);
-            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 1.0);
-
-            osc.connect(gain);
-            gain.connect(reverbNode);
-            gain.connect(masterGain);
-
-            osc.start();
-            osc.stop(audioCtx.currentTime + 1.1);
+    // --- VISUALIZER ENGINE ---
+    function render() {
+        canvas.width = canvas.clientWidth; canvas.height = canvas.clientHeight;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const time = Date.now() * 0.005;
+        ctx.beginPath();
+        ctx.lineWidth = isMouseDown ? 4 : 2;
+        ctx.strokeStyle = isMouseDown ? '#6366f1' : '#1e293b';
+        for(let i=0; i<=canvas.width; i++) {
+            const freq = gameState.currentFreq / 200;
+            const y = (canvas.height/2) + Math.sin(i*0.02*freq + time) * (isMouseDown ? 40 : 10);
+            if(i===0) ctx.moveTo(i,y); else ctx.lineTo(i,y);
         }
+        ctx.stroke();
+        requestAnimationFrame(render);
+    }
 
-        // Ekspos ke Global agar bisa dipanggil HTML
-        window.userTrigger = (note) => {
-            setupAudio();
-            playKalimba(note, false);
-            if (currentRoom) {
-                set(ref(db, 'rooms/' + currentRoom), {
-                    note: note,
-                    sender: myId,
-                    time: Date.now()
-                });
-            }
-        };
+    const wb = document.getElementById('waveBox');
+    const updateFreq = (e) => {
+        if(!gameState.isPlaying) return;
+        const rect = canvas.getBoundingClientRect();
+        const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+        const pct = Math.max(0, Math.min(1, x / rect.width));
+        gameState.currentFreq = 200 + (pct * 600);
+        if(oscillator) oscillator.frequency.setTargetAtTime(gameState.currentFreq, audioCtx.currentTime, 0.05);
+    };
 
-        // Tombol Connect
-        document.getElementById('connectBtn').onclick = () => {
-            setupAudio();
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-
-            const roomId = document.getElementById('roomInput').value;
-            if (roomId) {
-                currentRoom = roomId;
-                document.getElementById('status-text').innerText = `Status: Terhubung ke ${roomId}`;
-                
-                // Listening Modular
-                const roomRef = ref(db, 'rooms/' + roomId);
-                onValue(roomRef, (snapshot) => {
-                    const data = snapshot.val();
-                    if (data && data.sender !== myId) {
-                        playKalimba(data.note, true);
-                    }
-                });
-            }
-        };
-    </script>
+    wb.onmousedown = (e) => { isMouseDown = true; if(mainGain) mainGain.gain.setTargetAtTime(0.2, audioCtx.currentTime, 0.1); updateFreq(e); };
+    window.onmouseup = () => { isMouseDown = false; if(mainGain) mainGain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.1); };
+    wb.onmousemove = (e) => isMouseDown && updateFreq(e);
+    render();
+</script>
 </body>
 </html>
