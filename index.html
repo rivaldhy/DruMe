@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Pitch Master Pro | Professional UI</title>
+    <title>Pitch Master Pro | Battle Mode</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -17,51 +17,27 @@
             --success: #10b981;
         }
 
-        /* Lock Screen & Reset */
         html, body {
-            overflow: hidden;
-            position: fixed;
-            width: 100%;
-            height: 100%;
-            margin: 0;
-            padding: 0;
-            touch-action: none;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background: var(--bg);
+            overflow: hidden; width: 100%; height: 100%; margin: 0; padding: 0;
+            touch-action: none; font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg);
         }
 
         body { 
             background: radial-gradient(circle at 0% 0%, #1e1b4b 0%, #020617 100%);
-            color: var(--text);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+            color: var(--text); display: flex; align-items: center; justify-content: center;
         }
 
         .glass-card { 
-            background: var(--card);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-            padding: 2.5rem;
-            border-radius: 32px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            width: 88%;
-            max-width: 440px;
-            text-align: center;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
-            position: relative;
-            max-height: 85vh;
-            overflow-y: auto;
+            background: var(--card); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+            padding: 2rem; border-radius: 32px; border: 1px solid rgba(255, 255, 255, 0.08);
+            width: 90%; max-width: 440px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+            position: relative; max-height: 90vh; overflow-y: auto;
         }
 
         .screen { display: none; animation: fadeIn 0.4s ease-out; }
         .screen.active { display: block; }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
-        }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
 
         h1 { 
             font-size: 2.2rem; font-weight: 800; margin-bottom: 0.5rem; 
@@ -72,15 +48,13 @@
         .subtitle { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 2rem; display: block; }
 
         .mode-btn {
-            width: 100%; padding: 16px; margin: 10px 0; border-radius: 18px; 
+            width: 100%; padding: 14px; margin: 8px 0; border-radius: 18px; 
             border: 1px solid rgba(255,255,255,0.1);
             background: rgba(255,255,255,0.03); color: white; cursor: pointer; 
             font-weight: 600; transition: all 0.3s; font-size: 0.95rem;
         }
 
         .mode-btn:hover { background: var(--primary); box-shadow: 0 0 15px var(--primary-glow); }
-
-        .level-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 20px 0; }
 
         .wave-container {
             width: 100%; height: 160px; background: #000; border-radius: 24px;
@@ -102,36 +76,21 @@
 
         input { 
             background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); 
-            color: white; padding: 14px; border-radius: 14px; width: 100%; box-sizing: border-box; font-size: 16px;
+            color: white; padding: 14px; border-radius: 14px; width: 100%; box-sizing: border-box; font-size: 16px; margin-bottom: 10px;
         }
         
         .rank-item { display: flex; justify-content: space-between; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); }
 
-        /* Custom Modal Style */
         #customModal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8);
-            backdrop-filter: blur(10px);
-            z-index: 1000;
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); z-index: 1000;
             align-items: center; justify-content: center;
         }
         .modal-content {
-            background: #0f172a;
-            padding: 2.5rem;
-            border-radius: 24px;
-            border: 1px solid var(--primary);
-            text-align: center;
-            max-width: 320px;
-            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            background: #0f172a; padding: 2rem; border-radius: 24px; border: 1px solid var(--primary);
+            text-align: center; max-width: 300px;
         }
-        @keyframes popIn {
-            from { transform: scale(0.5); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
-        }
-        .score-value { font-size: 3.5rem; font-weight: 800; color: var(--primary); margin: 10px 0; }
-        .score-msg { font-style: italic; color: var(--text-muted); margin-bottom: 25px; font-size: 1.1rem; }
+        .score-value { font-size: 3rem; font-weight: 800; color: var(--primary); margin: 10px 0; }
     </style>
 </head>
 <body>
@@ -140,36 +99,51 @@
     <div class="modal-content">
         <h2 id="modalTitle">Hasil Skor</h2>
         <div class="score-value" id="modalScore">0%</div>
-        <p class="score-msg" id="modalMsg"></p>
-        <button class="action-btn btn-play" onclick="closeModal()">LANJUT</button>
+        <p id="modalMsg" style="margin-bottom: 20px;"></p>
+        <button class="action-btn btn-play" id="btnModalNext">LANJUT</button>
     </div>
 </div>
 
 <div class="glass-card">
+    <!-- LOBBY UTAMA -->
     <div id="lobby" class="screen active">
         <h1>Pitch Master</h1>
         <span class="subtitle">Asah pendengaran musikmu</span>
         <div style="margin-bottom: 20px; text-align: left;">
-            <label style="font-size: 0.7rem; font-weight: 800; color: var(--primary); margin-left: 10px;">IDENTITY</label>
-            <input type="text" id="playerNameInput" placeholder="Nama kamu...">
+            <label style="font-size: 0.7rem; font-weight: 800; color: var(--primary); margin-left: 10px;">ID KAMU</label>
+            <input type="text" id="playerNameInput" placeholder="Masukkan nama...">
         </div>
-        <button class="mode-btn" id="btnShowLevel">🎯 LEVEL MODE</button>
         <button class="mode-btn" id="btnSoloFree">👤 SOLO FREEPLAY</button>
-        <button class="mode-btn" id="btnMultiplayer">👥 BATTLE MODE</button>
+        <button class="mode-btn" id="btnMultiplayer">👥 LOCAL BATTLE</button>
+
+        <!-- ONLINE SECTION -->
+        <div id="online-section" style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
+            <button class="mode-btn" style="background: #4f46e5;" id="btnCreateRoom">➕ BUAT ROOM ONLINE</button>
+            <div style="display: flex; gap: 8px; margin-top: 8px;">
+                <input type="text" id="roomInput" placeholder="KODE ROOM" style="text-transform: uppercase;">
+                <button class="action-btn btn-play" style="width: 100px; padding: 10px; font-size: 0.8rem;" id="btnJoinRoom">GABUNG</button>
+            </div>
+        </div>
         
+        <!-- SETUP LOCAL MULTIPLAYER -->
         <div id="multi-setup" style="display:none; margin-top: 20px;">
-            <input type="number" id="playerCount" min="2" max="5" value="2" style="margin-bottom:10px;">
-            <div id="playerNamesContainer"></div>
-            <button class="action-btn btn-play" id="btnStartBattle" style="margin-top:10px">MULAI BATTLE</button>
+            <label style="color:var(--primary); font-weight: 800; font-size: 0.8rem;">JUMLAH PEMAIN</label>
+            <input type="number" id="playerCount" min="2" max="50" value="2">
+            <div id="playerNamesContainer" style="max-height: 200px; overflow-y: auto; margin-bottom: 10px;"></div>
+            <button class="action-btn btn-play" id="btnStartBattle">MULAI BATTLE</button>
         </div>
     </div>
 
-    <div id="level-screen" class="screen">
-        <h2>Pilih Level</h2>
-        <div id="level-grid" class="level-grid"></div>
-        <button class="mode-btn" id="btnBackLobby">KEMBALI</button>
+    <!-- ONLINE LOBBY -->
+    <div id="online-lobby" class="screen">
+        <h2 id="displayRoomCode">ROOM: ----</h2>
+        <div id="onlinePlayerList" style="margin: 20px 0; text-align: left; max-height: 300px; overflow-y: auto;"></div>
+        <p id="onlineStatusMsg" style="font-size: 0.8rem; color: var(--text-muted);">Menunggu Host...</p>
+        <button class="action-btn btn-play" id="btnHostStart" style="display:none; margin-bottom: 10px;">MULAI GAME</button>
+        <button class="mode-btn" onclick="location.reload()">KELUAR</button>
     </div>
 
+    <!-- GAME SCREEN -->
     <div id="game-screen" class="screen">
         <div id="activePlayerName" style="font-weight: 800; color: var(--primary); margin-bottom: 5px;">PLAYER</div>
         <div id="timeLeftDisplay" style="font-size: 1.5rem; font-weight: 800; color: var(--accent);">15s</div>
@@ -180,17 +154,19 @@
         <button class="action-btn btn-check" id="btnCheck">VALIDASI!</button>
     </div>
 
+    <!-- RESULTS -->
     <div id="results" class="screen">
-        <h2>Selesai!</h2>
+        <h2>Peringkat Akhir</h2>
         <div id="leaderboard"></div>
-        <button class="action-btn btn-play" onclick="location.reload()" style="margin-top:20px">MENU UTAMA</button>
+        <button class="action-btn btn-play" onclick="location.reload()" style="margin-top:20px">KEMBALI KE MENU</button>
     </div>
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, set, onValue, update, push, onDisconnect } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
+    // --- KONFIGURASI FIREBASE ---
     const firebaseConfig = {
         apiKey: "AIzaSyDd1_GfXEAubvEym0mYkXiz8SUZ35FtodY",
         databaseURL: "https://databersama-default-rtdb.firebaseio.com",
@@ -199,227 +175,315 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    const LEVELS = [
-        { id: 1, range: [300, 450], time: 20 },
-        { id: 2, range: [250, 550], time: 15 },
-        { id: 3, range: [200, 700], time: 12 }
-    ];
-
+    // --- STATE GAME ---
     let audioCtx, oscillator, mainGain;
-    let gameState = { mode: 'solo', currentLevelIdx: 0, players: [], currentPlayerIdx: 0, targetFreq: 0, currentFreq: 440, timeLeft: 15, isPlaying: false };
-    
-    const canvas = document.getElementById('canvas');
-    const ctx = canvas.getContext('2d');
+    let gameState = { 
+        mode: 'solo', 
+        players: [], 
+        currentPlayerIdx: 0, 
+        targetFreq: 0, 
+        currentFreq: 440,
+        timeLeft: 15, 
+        isPlaying: false,
+        currentRound: 1,
+        maxRounds: 5 
+    };
+
+    let currentRoomId = null;
+    let myPlayerKey = null;
+    let isHost = false;
     let isTouching = false;
 
-    // --- MODAL LOGIC ---
-    window.showResultModal = (score) => {
-        const modal = document.getElementById('customModal');
-        const scoreEl = document.getElementById('modalScore');
-        const msgEl = document.getElementById('modalMsg');
-        
-        scoreEl.innerText = score + "%";
-        modal.style.display = 'flex';
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
 
-        if(score >= 80) {
-            const highMsgs = ["jago nn", "skill teleh nn", "pitch perfect sih ini", "nice", "makangpuji sih ini", "jordan rudes sih ini"];
-            msgEl.innerText = highMsgs[Math.floor(Math.random() * highMsgs.length)];
-            scoreEl.style.color = "var(--success)";
-        } else {
-            const lowMsgs = ["pongo sto nn kang", "payah nn pe talinga itu", "Kore dulu tu talinga", "spa pe anak nn ini?", "so opa nn ini", "so tua nn sayang",];
-            msgEl.innerText = lowMsgs[Math.floor(Math.random() * lowMsgs.length)];
-            scoreEl.style.color = "var(--accent)";
-        }
-    };
-
-    window.closeModal = () => {
-        document.getElementById('customModal').style.display = 'none';
-        if (gameState.currentPlayerIdx < gameState.players.length - 1) {
-            gameState.currentPlayerIdx++;
-            prepareTurn();
-        } else {
-            showResults();
-        }
-    };
-
-    // --- GAME ENGINE ---
+    // --- UTILS ---
     function switchScreen(id) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById(id).classList.add('active');
-        if(id === 'game-screen') resizeCanvas();
+        if(id === 'game-screen') {
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+        }
     }
 
-    function resizeCanvas() {
-        canvas.width = canvas.parentElement.clientWidth;
-        canvas.height = canvas.parentElement.clientHeight;
-    }
-
-    function initGame(mode, levelIdx = 0) {
-        gameState.mode = mode;
-        gameState.currentLevelIdx = levelIdx;
-        gameState.players = mode === 'multi' 
-            ? Array.from(document.querySelectorAll('.multi-player-name')).map(inp => ({ name: inp.value || "Player", score: 0 }))
-            : [{ name: document.getElementById('playerNameInput').value || "Guest", score: 0 }];
+    // --- LOGIKA ONLINE ---
+    document.getElementById('btnCreateRoom').onclick = async () => {
+        const name = document.getElementById('playerNameInput').value;
+        if (!name) return alert("Masukkan nama kamu dulu!");
         
+        currentRoomId = Math.random().toString(36).substring(2, 8).toUpperCase();
+        isHost = true;
+        
+        const roomRef = ref(db, `rooms/${currentRoomId}`);
+        const hostPlayerRef = push(ref(db, `rooms/${currentRoomId}/players`));
+        myPlayerKey = hostPlayerRef.key;
+
+        await set(roomRef, {
+            status: 'waiting',
+            hostName: name,
+            createdAt: Date.now()
+        });
+
+        await set(hostPlayerRef, {
+            name: name,
+            totalScore: 0,
+            finished: false
+        });
+
+        document.getElementById('displayRoomCode').innerText = `ROOM: ${currentRoomId}`;
+        document.getElementById('btnHostStart').style.display = 'block';
+        switchScreen('online-lobby');
+        listenToRoom();
+    };
+
+    document.getElementById('btnJoinRoom').onclick = async () => {
+        const name = document.getElementById('playerNameInput').value;
+        const code = document.getElementById('roomInput').value.toUpperCase();
+        if (!name || !code) return alert("Isi nama dan kode room!");
+
+        onValue(ref(db, `rooms/${code}`), async (snapshot) => {
+            if (!snapshot.exists()) return alert("Room tidak ditemukan!");
+            if (snapshot.val().status === 'playing') return alert("Game sudah dimulai!");
+            
+            if (!myPlayerKey) {
+                currentRoomId = code;
+                const newPlayerRef = push(ref(db, `rooms/${code}/players`));
+                myPlayerKey = newPlayerRef.key;
+                await set(newPlayerRef, { name: name, totalScore: 0, finished: false });
+                switchScreen('online-lobby');
+                document.getElementById('displayRoomCode').innerText = `ROOM: ${code}`;
+                listenToRoom();
+            }
+        }, { onlyOnce: true });
+    };
+
+    function listenToRoom() {
+        onValue(ref(db, `rooms/${currentRoomId}/players`), (snapshot) => {
+            const players = snapshot.val();
+            const listDiv = document.getElementById('onlinePlayerList');
+            listDiv.innerHTML = '';
+            gameState.players = [];
+            
+            for (let id in players) {
+                const p = players[id];
+                listDiv.innerHTML += `<div class="rank-item"><span>${p.name}</span> <span style="color:var(--success)">Ready</span></div>`;
+                gameState.players.push({ id, ...p });
+            }
+        });
+
+        onValue(ref(db, `rooms/${currentRoomId}/status`), (snapshot) => {
+            if (snapshot.val() === 'playing') {
+                initGame('online');
+            }
+        });
+    }
+
+    document.getElementById('btnHostStart').onclick = () => {
+        update(ref(db, `rooms/${currentRoomId}`), { status: 'playing' });
+    };
+
+    // --- LOCAL MULTIPLAYER SETUP ---
+    document.getElementById('btnMultiplayer').onclick = () => {
+        document.getElementById('multi-setup').style.display = 'block';
+        updatePlayerInputs();
+    };
+
+    document.getElementById('playerCount').oninput = updatePlayerInputs;
+
+    function updatePlayerInputs() {
+        const container = document.getElementById('playerNamesContainer');
+        const count = Math.min(50, Math.max(2, document.getElementById('playerCount').value));
+        container.innerHTML = '';
+        for(let i = 0; i < count; i++) {
+            const input = document.createElement('input');
+            input.placeholder = `Nama Pemain ${i+1}`;
+            input.className = 'multi-player-name';
+            container.appendChild(input);
+        }
+    }
+
+    // --- GAME CORE ---
+    function initGame(mode) {
+        gameState.mode = mode;
+        gameState.currentRound = 1;
         gameState.currentPlayerIdx = 0;
+        
+        if (mode === 'multi') {
+            gameState.players = Array.from(document.querySelectorAll('.multi-player-name'))
+                .map(inp => ({ name: inp.value || "Pemain", totalScore: 0 }));
+            gameState.maxRounds = 1; 
+        } else if (mode === 'online') {
+            // Pemain online bermain 5 ronde masing-masing
+            gameState.maxRounds = 5;
+            // Cari data diri sendiri di array players
+            const me = gameState.players.find(p => p.id === myPlayerKey);
+            gameState.players = [ { ...me, totalScore: 0 } ];
+        } else {
+            gameState.players = [{ name: document.getElementById('playerNameInput').value || "Guest", totalScore: 0 }];
+            gameState.maxRounds = 5;
+        }
+
         switchScreen('game-screen');
         prepareTurn();
     }
 
     function prepareTurn() {
         gameState.isPlaying = false;
-        document.getElementById('activePlayerName').innerText = gameState.players[gameState.currentPlayerIdx].name;
+        const player = gameState.players[gameState.currentPlayerIdx];
+        const roundInfo = `Round ${gameState.currentRound}/${gameState.maxRounds}`;
+        document.getElementById('activePlayerName').innerText = `${player.name} (${roundInfo})`;
+        
         document.getElementById('btnStartTurn').style.display = 'block';
         document.getElementById('btnCheck').style.display = 'none';
-        document.getElementById('gameMsg').innerText = "Klik Start untuk mendengar target";
         document.getElementById('timerBar').style.width = "100%";
-        document.getElementById('timeLeftDisplay').innerText = (gameState.mode === 'level' ? LEVELS[gameState.currentLevelIdx].time : 15) + "s";
+        document.getElementById('gameMsg').innerText = "Klik Start untuk mendengar nada target";
     }
 
-    function startTurn() {
+    document.getElementById('btnStartTurn').onclick = () => {
         if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         if (audioCtx.state === 'suspended') audioCtx.resume();
 
-        if (oscillator) { oscillator.stop(); oscillator.disconnect(); }
-        oscillator = audioCtx.createOscillator();
-        mainGain = audioCtx.createGain();
-        oscillator.connect(mainGain);
-        mainGain.connect(audioCtx.destination);
-        mainGain.gain.value = 0;
-        oscillator.start();
-
-        const range = gameState.mode === 'level' ? LEVELS[gameState.currentLevelIdx].range : [200, 800];
-        gameState.targetFreq = Math.floor(Math.random() * (range[1] - range[0])) + range[0];
+        gameState.targetFreq = Math.floor(Math.random() * 600) + 200;
         
-        // Play Target Hint
         const tOsc = audioCtx.createOscillator();
         const tGain = audioCtx.createGain();
         tOsc.frequency.value = gameState.targetFreq;
-        tOsc.connect(tGain); tGain.connect(audioCtx.destination);
-        tGain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-        tGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.2);
-        tOsc.start(); tOsc.stop(audioCtx.currentTime + 1.3);
+        tOsc.connect(tGain); 
+        tGain.connect(audioCtx.destination);
+        tGain.gain.setValueAtTime(0, audioCtx.currentTime);
+        tGain.gain.linearRampToValueAtTime(0.4, audioCtx.currentTime + 0.1);
+        tGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.5);
+        tOsc.start(); 
+        tOsc.stop(audioCtx.currentTime + 1.6);
+
+        if (oscillator) { try { oscillator.stop(); } catch(e){} oscillator.disconnect(); }
+        oscillator = audioCtx.createOscillator();
+        mainGain = audioCtx.createGain();
+        oscillator.frequency.value = gameState.currentFreq;
+        oscillator.connect(mainGain);
+        mainGain.connect(audioCtx.destination);
+        mainGain.gain.value = 0; 
+        oscillator.start();
 
         gameState.isPlaying = true;
-        const totalTime = gameState.mode === 'level' ? LEVELS[gameState.currentLevelIdx].time : 15;
-        gameState.timeLeft = totalTime;
-
+        gameState.timeLeft = 15;
         document.getElementById('btnStartTurn').style.display = 'none';
         document.getElementById('btnCheck').style.display = 'block';
-        document.getElementById('gameMsg').innerText = "Geser gelombang ke kiri/kanan!";
 
         const timer = setInterval(() => {
             if (!gameState.isPlaying) { clearInterval(timer); return; }
             gameState.timeLeft--;
             document.getElementById('timeLeftDisplay').innerText = gameState.timeLeft + "s";
-            document.getElementById('timerBar').style.width = (gameState.timeLeft / totalTime * 100) + "%";
-            if (gameState.timeLeft <= 0) {
-                clearInterval(timer);
-                validatePitch();
-            }
+            document.getElementById('timerBar').style.width = (gameState.timeLeft / 15 * 100) + "%";
+            if (gameState.timeLeft <= 0) { clearInterval(timer); validatePitch(); }
         }, 1000);
-    }
-
-    function validatePitch() {
-        gameState.isPlaying = false;
-        if(mainGain) mainGain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.1);
-        
-        const diff = Math.abs(gameState.currentFreq - gameState.targetFreq);
-        const accuracy = Math.max(0, Math.round(100 - (diff / 2.5)));
-        
-        gameState.players[gameState.currentPlayerIdx].score = accuracy;
-        
-        push(ref(db, 'scores/'), {
-            name: gameState.players[gameState.currentPlayerIdx].name,
-            score: accuracy,
-            mode: gameState.mode,
-            date: new Date().toISOString()
-        });
-
-        showResultModal(accuracy);
-    }
-
-    function showResults() {
-        switchScreen('results');
-        const board = document.getElementById('leaderboard');
-        board.innerHTML = gameState.players
-            .sort((a,b) => b.score - a.score)
-            .map((p, i) => `<div class="rank-item"><span>#${i+1} ${p.name}</span><span>${p.score}%</span></div>`)
-            .join('');
-    }
-
-    // --- IMPROVED VISUALIZER ---
-    function render() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
-        const amp = isTouching ? 50 : 15;
-        const freqVisual = gameState.currentFreq / 60;
-
-        ctx.beginPath();
-        ctx.lineWidth = 3;
-        ctx.strokeStyle = isTouching ? '#6366f1' : 'rgba(99, 102, 241, 0.2)';
-        
-        for (let x = 0; x < canvas.width; x++) {
-            const y = canvas.height / 2 + Math.sin(x * 0.02 * freqVisual + Date.now() * 0.005) * amp;
-            if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-        }
-        ctx.stroke();
-        requestAnimationFrame(render);
-    }
+    };
 
     const handleInput = (e) => {
         if (!gameState.isPlaying) return;
         isTouching = true;
         const rect = canvas.getBoundingClientRect();
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        const pct = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
-        
+        let pct = (clientX - rect.left) / rect.width;
+        pct = Math.max(0, Math.min(1, pct));
         gameState.currentFreq = 200 + (pct * 800);
-        
+
         if (oscillator && mainGain) {
-            oscillator.frequency.setTargetAtTime(gameState.currentFreq, audioCtx.currentTime, 0.03);
-            mainGain.gain.setTargetAtTime(0.2, audioCtx.currentTime, 0.05);
+            oscillator.frequency.setTargetAtTime(gameState.currentFreq, audioCtx.currentTime, 0.05);
+            mainGain.gain.setTargetAtTime(0.3, audioCtx.currentTime, 0.05);
         }
     };
 
-    // Events
     canvas.addEventListener('mousedown', handleInput);
-    window.addEventListener('mousemove', (e) => isTouching && handleInput(e));
-    window.addEventListener('mouseup', () => { 
-        isTouching = false; 
-        if(mainGain) mainGain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.1); 
-    });
-
+    window.addEventListener('mousemove', (e) => { if(isTouching) handleInput(e); });
+    window.addEventListener('mouseup', () => { isTouching = false; if(mainGain) mainGain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.1); });
     canvas.addEventListener('touchstart', (e) => { e.preventDefault(); handleInput(e); }, {passive: false});
     canvas.addEventListener('touchmove', (e) => { e.preventDefault(); handleInput(e); }, {passive: false});
-    canvas.addEventListener('touchend', () => { 
-        isTouching = false; 
-        if(mainGain) mainGain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.1); 
-    });
+    canvas.addEventListener('touchend', () => { isTouching = false; if(mainGain) mainGain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.1); });
 
-    // Navigation Listeners
-    document.getElementById('btnSoloFree').onclick = () => initGame('solo');
-    document.getElementById('btnShowLevel').onclick = () => {
-        switchScreen('level-screen');
-        document.getElementById('level-grid').innerHTML = LEVELS.map((l, i) => 
-            `<button class="mode-btn" onclick="document.dispatchEvent(new CustomEvent('sel-lvl', {detail:${i}}))">Lvl ${l.id}</button>`
+    function validatePitch() {
+        gameState.isPlaying = false;
+        if(mainGain) mainGain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.1);
+        const diff = Math.abs(gameState.currentFreq - gameState.targetFreq);
+        const accuracy = Math.max(0, Math.round(100 - (diff / 2.5)));
+        
+        gameState.players[gameState.currentPlayerIdx].totalScore += accuracy;
+
+        document.getElementById('modalScore').innerText = accuracy + "%";
+        document.getElementById('modalMsg').innerText = accuracy > 85 ? "Luar Biasa!" : "Bagus! Terus asah telingamu.";
+        document.getElementById('customModal').style.display = 'flex';
+    }
+
+    document.getElementById('btnModalNext').onclick = async () => {
+        document.getElementById('customModal').style.display = 'none';
+        
+        if (gameState.currentRound < gameState.maxRounds) {
+            gameState.currentRound++;
+            prepareTurn();
+        } else {
+            // Selesai semua ronde
+            if (gameState.mode === 'online') {
+                // Update skor ke Firebase
+                await update(ref(db, `rooms/${currentRoomId}/players/${myPlayerKey}`), {
+                    totalScore: gameState.players[0].totalScore,
+                    finished: true
+                });
+                showOnlineResults();
+            } else if (gameState.mode === 'multi' && gameState.currentPlayerIdx < gameState.players.length - 1) {
+                gameState.currentPlayerIdx++;
+                gameState.currentRound = 1;
+                prepareTurn();
+            } else {
+                showResults();
+            }
+        }
+    };
+
+    function showOnlineResults() {
+        switchScreen('results');
+        const board = document.getElementById('leaderboard');
+        board.innerHTML = "<p>Menunggu pemain lain selesai...</p>";
+
+        onValue(ref(db, `rooms/${currentRoomId}/players`), (snapshot) => {
+            const players = snapshot.val();
+            const sorted = Object.values(players).sort((a,b) => b.totalScore - a.totalScore);
+            board.innerHTML = sorted.map((p, i) => 
+                `<div class="rank-item">
+                    <span>#${i+1} ${p.name} ${p.finished ? '' : '(Playing...)'}</span>
+                    <span>${p.totalScore} pts</span>
+                </div>`
+            ).join('');
+        });
+    }
+
+    function showResults() {
+        switchScreen('results');
+        const board = document.getElementById('leaderboard');
+        const sorted = [...gameState.players].sort((a,b) => b.totalScore - a.totalScore);
+        board.innerHTML = sorted.map((p, i) => 
+            `<div class="rank-item"><span>#${i+1} ${p.name}</span><span>${p.totalScore} pts</span></div>`
         ).join('');
-    };
-    document.addEventListener('sel-lvl', (e) => initGame('level', e.detail));
-    document.getElementById('btnStartTurn').onclick = startTurn;
-    document.getElementById('btnCheck').onclick = validatePitch;
-    document.getElementById('btnBackLobby').onclick = () => switchScreen('lobby');
-    document.getElementById('btnMultiplayer').onclick = () => {
-        const setupDiv = document.getElementById('multi-setup');
-        setupDiv.style.display = setupDiv.style.display === 'none' ? 'block' : 'none';
-        const setup = () => {
-            const c = document.getElementById('playerCount').value;
-            let h = ''; for(let i=0; i<c; i++) h += `<input type="text" class="multi-player-name" placeholder="Pemain ${i+1}" style="margin-top:8px">`;
-            document.getElementById('playerNamesContainer').innerHTML = h;
-        };
-        document.getElementById('playerCount').onchange = setup; setup();
-    };
+    }
+
+    function render() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const amp = isTouching ? 60 : 20;
+        const freqVisual = gameState.currentFreq / 50; 
+        ctx.beginPath();
+        ctx.lineWidth = 4;
+        ctx.strokeStyle = isTouching ? '#6366f1' : 'rgba(99, 102, 241, 0.3)';
+        for (let x = 0; x < canvas.width; x++) {
+            const y = canvas.height / 2 + Math.sin(x * 0.01 * freqVisual + Date.now() * 0.006) * amp;
+            if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+        requestAnimationFrame(render);
+    }
+
+    document.getElementById('btnSoloFree').onclick = () => initGame('solo');
     document.getElementById('btnStartBattle').onclick = () => initGame('multi');
+    document.getElementById('btnCheck').onclick = validatePitch;
 
     render();
 </script>
